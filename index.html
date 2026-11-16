@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一个记录个人作品、兴趣和学习过程的小站。">
+  <title>我的小站｜个人主页</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="wordmark" href="#top"><span class="mark" aria-hidden="true">✳</span> 我的小站</a>
+      <nav aria-label="主导航">
+        <a href="#projects">作品</a>
+        <a href="#about">关于我</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="container hero" aria-labelledby="welcome">
+      <div class="hero-content">
+        <!-- 把这一行改成你的名字或昵称。 -->
+        <p class="intro">你好，我是 <strong>你的名字</strong></p>
+        <h1 id="welcome">把喜欢的事，<br>一件件做出来<span>。</span></h1>
+        <p class="hero-description">这里收集我做过的东西、正在学的事，以及过程中值得记下的想法。</p>
+        <a class="button" href="#projects">看看作品 <span aria-hidden="true">↘</span></a>
+      </div>
+      <img class="cover" src="assets/cover.jpg" width="1122" height="1402"
+        alt="阳光下的空白速写本、橙色笔记本、蓝色铅笔和相机">
+    </section>
+
+    <section class="container projects" id="projects" aria-labelledby="projects-title">
+      <div class="section-heading">
+        <h2 id="projects-title">作品</h2>
+        <p>从一个可以打开的网页开始。</p>
+      </div>
+      <div class="project-grid">
+        <article class="project">
+          <div class="project-art site-art" aria-hidden="true">
+            <div class="mini-window">
+              <div class="mini-bar"><i></i><i></i><i></i></div>
+              <div class="mini-page">
+                <div class="mini-copy"><b>✳</b><i></i><i></i><i></i></div>
+                <img src="assets/cover.jpg" width="1122" height="1402" alt="" loading="lazy">
+              </div>
+            </div>
+          </div>
+          <div class="project-info">
+            <h3>我的第一个网站</h3>
+            <p>把个人介绍和作品放在同一页，做成一个随时可以打开的小站。</p>
+            <details>
+              <summary>查看作品详情</summary>
+              <p>这个页面用 HTML 组织内容，用 CSS 调整排版和颜色。你可以打开源文件，换上自己的介绍、作品和照片。</p>
+            </details>
+          </div>
+        </article>
+        <article class="project">
+          <div class="project-art notebook-art" aria-hidden="true">
+            <div class="notebook"><span>✳</span><i></i><i></i><i></i></div>
+          </div>
+          <div class="project-info">
+            <h3>学习笔记 <small>示例</small></h3>
+            <p>记录一个问题、我试过的方法，以及最后学到的东西。</p>
+            <details>
+              <summary>查看作品详情</summary>
+              <p>可以从三句话写起：今天想弄明白什么？我做了哪一步？下次要试什么？把这个例子换成你自己的第一篇笔记。</p>
+            </details>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="about" id="about" aria-labelledby="about-title">
+      <div class="container about-inner">
+        <h2 id="about-title">关于我</h2>
+        <!-- 以下为示例。写上你感兴趣的事、最近在做什么，以及这个网站想记录什么。 -->
+        <div>
+          <p>我喜欢动手做东西，也喜欢把过程中遇到的问题记下来。这个小站是我整理作品、分享学习过程的地方。</p>
+          <p class="placeholder-note">这是一段示例简介，可以换成你自己的故事。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <span>我的小站</span>
+    <a href="#top">回到顶部 <span aria-hidden="true">↑</span></a>
+  </footer>
+</body>
+</html>
