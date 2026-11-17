@@ -11,6 +11,7 @@ const shareFields = document.querySelector("#share-fields");
 const shareLink = document.querySelector("#share-link");
 const shareStatus = document.querySelector("#share-status");
 let previewTrigger = null;
+let readingDeliveredLetter = false;
 
 const defaultCard = {
   recipient: cardRecipient.textContent,
@@ -44,6 +45,7 @@ document.querySelector("#star-egg").addEventListener("click", () => {
 for (const button of document.querySelectorAll("[data-open-card]")) {
   button.addEventListener("click", () => {
     if (card.open) return;
+    readingDeliveredLetter = button === treeCard;
     if (composer.open) {
       previewTrigger = button;
       composer.close();
@@ -52,6 +54,10 @@ for (const button of document.querySelectorAll("[data-open-card]")) {
   });
 }
 card.addEventListener("close", () => {
+  if (readingDeliveredLetter) {
+    readingDeliveredLetter = false;
+    treeCard.dispatchEvent(new Event("greeting-read"));
+  }
   if (!previewTrigger) return;
   const trigger = previewTrigger;
   previewTrigger = null;
