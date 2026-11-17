@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#081a15">
+  <meta name="description" content="滑动点亮圣诞树，接过圣诞老人送来的贺卡">
+  <title>圣诞来信｜雪地送信</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="tree.js" defer></script>
+  <script src="card.js" defer></script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#scroll-cue">跳到特效控制</a>
+  <main>
+    <section class="tree-track" id="greeting" aria-labelledby="tree-title">
+      <div class="scene">
+        <canvas id="tree-scene" aria-hidden="true"></canvas>
+        <canvas id="scene-snow" aria-hidden="true"></canvas>
+        <header class="site-header">
+          <a class="wordmark" href="#greeting"><span aria-hidden="true">✦</span> 圣诞来信</a>
+          <button class="compose-trigger" id="open-compose" type="button" aria-haspopup="dialog" aria-controls="compose">
+            写一张贺卡 <span aria-hidden="true">↗</span>
+          </button>
+        </header>
+
+        <div class="scene-copy">
+          <p class="holiday" lang="en">Merry Christmas</p>
+          <h1 id="tree-title">圣诞快乐</h1>
+          <p class="scene-description">愿你抬头见星光，回家有暖灯<br>愿新的一年，心里的小愿望慢慢实现</p>
+        </div>
+
+        <div class="sleigh-arrival" id="sleigh-arrival" hidden>
+          <img class="sleigh-image" src="assets/santa-sleigh.png" width="1120" height="560"
+            alt="驯鹿拉着红色雪橇，圣诞老人举着一封信" draggable="false">
+          <button class="tree-card" id="tree-card" type="button" data-open-card aria-haspopup="dialog" hidden>
+            <span class="tree-card-label">打开贺卡</span>
+          </button>
+        </div>
+
+        <button class="star-egg" id="star-egg" type="button" aria-label="打开树顶彩蛋"
+          aria-haspopup="dialog" aria-controls="star-egg-page" hidden></button>
+
+        <div class="scene-controls">
+          <button class="scroll-cue" id="scroll-cue" type="button">
+            <span class="scroll-arrow" aria-hidden="true">↻</span><span>重置动画</span>
+          </button>
+          <span class="progress-track" aria-hidden="true"><span id="progress-fill"></span></span>
+        </div>
+
+        <noscript><p class="noscript-note">请开启 JavaScript 观看圣诞树并打开贺卡</p></noscript>
+      </div>
+    </section>
+
+  </main>
+
+  <dialog class="letter compose-dialog" id="compose" aria-labelledby="compose-title">
+    <div class="compose">
+      <form method="dialog" class="close-form">
+        <button class="close-card" type="submit" aria-label="关闭写贺卡窗口" autofocus>×</button>
+      </form>
+      <div class="compose-copy">
+        <span class="section-star" aria-hidden="true">✦</span>
+        <h2 id="compose-title">寄出你的祝福</h2>
+        <p>写下对方的名字和一句祝福，把亲手写的贺卡送给朋友</p>
+        <img class="compose-image" src="assets/christmas-eve.jpg" width="1536" height="1024"
+          alt="雪夜里亮着暖灯的松林小屋" loading="lazy">
+      </div>
+      <form id="card-form">
+        <div class="form-row">
+          <label>收信人 <input name="to" maxlength="24" placeholder="朋友的名字" autocomplete="off"></label>
+          <label>落款 <input name="from" maxlength="24" placeholder="你的名字" autocomplete="off"></label>
+        </div>
+        <label>祝福语
+          <textarea name="wish" maxlength="160" rows="4" placeholder="愿你这个冬天，遇到很多温柔的小事"></textarea>
+        </label>
+        <button class="button button-green" type="submit">生成祝福卡 <span aria-hidden="true">↗</span></button>
+        <div class="share-result" id="share-result" hidden>
+          <div class="share-fields" id="share-fields" hidden>
+            <label>你的分享链接 <input id="share-link" readonly spellcheck="false"></label>
+            <button class="button button-outline" id="copy-link" type="button">复制链接</button>
+          </div>
+          <p class="status" id="share-status" role="status"></p>
+          <button class="text-button" type="button" data-open-card aria-haspopup="dialog">预览贺卡 <span aria-hidden="true">↗</span></button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog class="letter" id="christmas-letter" aria-labelledby="card-recipient">
+    <article class="letter-paper">
+      <form method="dialog" class="close-form">
+        <button class="close-card" type="submit" aria-label="关闭贺卡" autofocus>×</button>
+      </form>
+      <p class="letter-holiday" lang="en"><span aria-hidden="true">✦</span> Merry Christmas</p>
+      <h2 id="card-recipient">给正在读这封信的你</h2>
+      <p id="card-message">愿你今晚睡得安稳，明早醒来有好心情
+愿新的一年，有人陪你走很远的路，也有许多小事让你忍不住笑
+圣诞快乐！</p>
+      <p id="card-sender">—— 圣诞来信</p>
+    </article>
+  </dialog>
+  <dialog class="letter egg-page" id="star-egg-page" aria-label="彩蛋">
+    <form method="dialog" class="close-form">
+      <button class="close-card" type="submit" aria-label="关闭彩蛋" autofocus>×</button>
+    </form>
+  </dialog>
+</body>
+</html>
