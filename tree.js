@@ -8,11 +8,12 @@
   const track = document.querySelector(".tree-track");
   const sleigh = document.querySelector("#sleigh-arrival");
   const ornament = document.querySelector("#tree-card");
-  const starEgg = document.querySelector("#star-egg");
+  const giftHotspot = document.querySelector("#green-gift");
   const progressFill = document.querySelector("#progress-fill");
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
   const turn = Math.PI * 2;
   const sceneDuration = 6000;
+  const departureDuration = 2200;
   const sparkRelease = 0.045;
   const starArrival = 0.21;
   const lightingStart = 0.35;
@@ -35,12 +36,15 @@
     length: 1 + random() * 6,
     tilt: random() * 5,
   })));
-  const decorations = Array.from({ length: 36 }, () => ({
-    height: 0.19 + random() * 0.745,
-    angle: random() * turn,
-    size: 3 + random() * 4,
-    tone: random(),
-  }));
+  const decorationTiers = [[0.22, 3], [0.37, 4], [0.52, 5], [0.67, 6], [0.82, 7]];
+  const decorations = decorationTiers.flatMap(([height, count], tier) =>
+    Array.from({ length: count }, (_, index) => ({
+      height: height + (index % 2 === 0 ? -0.012 : 0.012),
+      angle: turn * ((index + 0.2) / count + tier * 0.19),
+      size: 3.6 + tier * 0.28,
+      gold: (index + tier) % 3 === 0,
+    }))
+  );
   const flakes = Array.from({ length: 100 }, () => ({
     x: random(),
     y: random(),
@@ -57,6 +61,7 @@
     ["#ff654e", "#ffd1a8"],
     ["#87dcb7", "#e4ffe8"],
   ];
+  const wireOpacity = [0.16, 0.42, 0.73, 1];
   const halos = lightColors.map(([color]) => {
     const sprite = document.createElement("canvas");
     sprite.width = sprite.height = 48;
@@ -77,9 +82,11 @@
   let treeTop = 0;
   let treeHeight = 0;
   let treeWidth = 0;
+  let presents = [];
   let scale = 1;
   let landingY = 0;
   let flightStart = null;
+  let departureStart = null;
   let canRotate = false;
   let gesture = null;
   let yaw = 0;
@@ -117,8 +124,7 @@
     treeTop = mobile ? Math.max(height * 0.272, height * 0.822 - treeHeight) : (height - treeHeight) * 0.46;
     treeWidth = Math.min(treeHeight * 0.382, width * (mobile ? 0.435 : 0.235));
     scale = Math.min(1.1, Math.max(0.6, treeHeight / 550));
-    starEgg.style.left = centerX + "px";
-    starEgg.style.top = starY() + "px";
+    positionGifts(mobile);
     const sleighWidth = mobile ? Math.min(width * 0.91, 430) : Math.min(Math.max(width * 0.40, 340), 580);
     sleigh.style.width = sleighWidth + "px";
     landingY = height * (mobile ? 0.88 : 0.90) - sleighWidth / 4;
@@ -193,6 +199,17 @@
     };
   }
 
+  function departurePose(progress) {
+    const t = progress * (0.45 + 0.55 * progress);
+    return {
+      x: bezier(centerX, centerX - width * 0.10, width * 0.18, -width * 0.25, t),
+      y: bezier(landingY, landingY + height * 0.015, height * 0.60, height * 0.42, t),
+      scale: 1 - 0.42 * ramp(0.08, 1, progress),
+      bank: 8 * ramp(0.14, 0.80, progress),
+      opacity: 1 - ramp(0.85, 1, progress),
+    };
+  }
+
   function drawLight(x, y, size, color, alpha) {
     const radius = size * 5.6;
     context.globalAlpha = alpha;
@@ -246,8 +263,22 @@
       context.stroke();
     }
     context.restore();
-    context.fillStyle = "#574332";
-    context.fillRect(centerX - 8 * scale, ground - treeHeight * 0.11, 16 * scale, treeHeight * 0.108);
+
+    const trunkTop = treeTop + treeHeight * 0.84;
+    const trunkBottom = ground - scale;
+    const bark = context.createLinearGradient(centerX - 11 * scale, 0, centerX + 11 * scale, 0);
+    bark.addColorStop(0, "#3d3027");
+    bark.addColorStop(0.54, "#6b513b");
+    bark.addColorStop(1, "#483529");
+    context.fillStyle = bark;
+    context.beginPath();
+    context.moveTo(centerX - 7 * scale, trunkTop);
+    context.lineTo(centerX + 7 * scale, trunkTop);
+    context.quadraticCurveTo(centerX + 6 * scale, trunkBottom - 9 * scale, centerX + 11 * scale, trunkBottom);
+    context.quadraticCurveTo(centerX, trunkBottom + 3 * scale, centerX - 11 * scale, trunkBottom);
+    context.quadraticCurveTo(centerX - 6 * scale, trunkBottom - 9 * scale, centerX - 7 * scale, trunkTop);
+    context.closePath();
+    context.fill();
   }
 
   function drawBoughs() {
@@ -259,13 +290,12 @@
     context.fillStyle = bough;
 
     for (let band = 8; band >= 0; band--) {
-      const tip = 0.012 + band * 0.092;
+      const tip = band * 0.092;
       const end = 0.263 + band * 0.088;
       const apexY = treeTop + tip * treeHeight;
       const baseY = treeTop + end * treeHeight;
       const half = treeWidth * Math.pow(end, 0.88);
-      const offset = band * 0.72;
-      const center = centerX + (Math.sin(yaw + offset) - Math.sin(offset)) * half * 0.075;
+      const center = centerX;
       const slope = baseY - apexY;
       context.beginPath();
       context.moveTo(center, apexY);
@@ -306,9 +336,9 @@
       context.beginPath();
       for (const needle of needles[shade]) {
         const tier = (needle.height * 9.8) % 1;
-        const point = project(needle.height, needle.angle + rotation * 0.6, needle.distance * (0.79 + tier * 0.21));
+        const point = project(needle.height, needle.angle + rotation, needle.distance * (0.79 + tier * 0.21));
         const length = needle.length * scale;
-        const direction = point.x > centerX ? 1 : -1;
+        const direction = 2 * clamp(0.5 + (point.x - centerX) / (treeWidth * 0.32)) - 1;
         context.moveTo(point.x, point.y);
         context.lineTo(point.x + length * direction, point.y + needle.tilt * scale);
       }
@@ -321,22 +351,22 @@
   }
 
   function drawDecorations(rotation, opacity) {
-    context.globalAlpha = opacity;
     for (const decoration of decorations) {
-      const point = project(decoration.height, decoration.angle + rotation, 0.86);
-      if (point.depth < -0.12) continue;
-      const radius = decoration.size * scale;
-      const color = decoration.tone > 0.65 ? 0 : 1;
-      const tone = lightColors[color][0];
-      context.fillStyle = color === 0 ? "#9e6b32" : "#832e32";
-      context.strokeStyle = tone + "bb";
-      context.lineWidth = 0.75;
+      const point = project(decoration.height, decoration.angle + rotation, 0.76);
+      const front = ramp(-0.05, 0.38, point.depth);
+      if (front <= 0) continue;
+      context.globalAlpha = opacity * front;
+      const radius = decoration.size * scale * (0.85 + 0.15 * front);
+      const rim = decoration.gold ? "#eac38a" : "#e9927c";
+      context.fillStyle = decoration.gold ? "#ac773c" : "#963d40";
+      context.strokeStyle = rim + "bb";
+      context.lineWidth = 0.75 * scale;
       context.beginPath();
       context.arc(point.x, point.y, radius, 0, turn);
       context.fill();
       context.stroke();
-      context.fillStyle = tone;
-      context.fillRect(point.x - radius * 0.2, point.y - radius - 2, radius * 0.40, 2.4);
+      context.fillStyle = rim;
+      context.fillRect(point.x - radius * 0.22, point.y - radius * 1.22, radius * 0.44, radius * 0.29);
       context.fillStyle = "#fff1cc88";
       context.beginPath();
       context.arc(point.x - radius * 0.30, point.y - radius * 0.30, radius * 0.22, 0, turn);
@@ -388,19 +418,29 @@
   function drawGarland(time, rotation, lighting, snow) {
     context.lineWidth = 1.4 * scale;
     context.strokeStyle = "#f2bc645c";
-    context.globalAlpha = ramp(0, 0.15, lighting);
-    context.beginPath();
-    let previous;
-    for (let step = 0; step <= Math.floor(lighting * 260); step++) {
+    const brightness = ramp(0, 0.15, lighting);
+    const lines = wireOpacity.map(() => []);
+    let previous = garlandPoint(0, rotation);
+    for (let step = 1; step <= Math.floor(lighting * 260); step++) {
       const point = garlandPoint(step / 260, rotation);
-      if (point.depth > -0.16 && previous && previous.depth > -0.16) {
-        context.lineTo(point.x, point.y);
-      } else {
-        context.moveTo(point.x, point.y);
+      const front = ramp(-0.49, 0.28, (point.depth + previous.depth) / 2);
+      if (front > 0) {
+        const layer = Math.min(wireOpacity.length - 1, Math.floor(front * wireOpacity.length));
+        lines[layer].push(previous.x, previous.y, point.x, point.y);
       }
       previous = point;
     }
-    context.stroke();
+    for (let layer = 0; layer < lines.length; layer++) {
+      const segments = lines[layer];
+      if (!segments.length) continue;
+      context.globalAlpha = brightness * wireOpacity[layer];
+      context.beginPath();
+      for (let index = 0; index < segments.length; index += 4) {
+        context.moveTo(segments[index], segments[index + 1]);
+        context.lineTo(segments[index + 2], segments[index + 3]);
+      }
+      context.stroke();
+    }
     context.globalAlpha = 1;
 
     for (let bulb = 0; bulb <= 91; bulb++) {
@@ -408,23 +448,32 @@
       const reveal = ramp(0, 0.075, lighting * 1.08 - position);
       if (reveal <= 0) continue;
       const point = garlandPoint(position, rotation);
-      if (point.depth < -0.25) continue;
+      const front = ramp(-0.49, 0.28, point.depth);
+      if (front <= 0) continue;
       const warmth = 0.59 + Math.cos(time * 2.4 + bulb * 2.3) * 0.26;
       const color = bulb % 5 < snow * 3 ? (bulb % 2 ? 1 : 2) : 0;
-      drawLight(point.x, point.y, (2 + warmth * 0.9) * scale, color, reveal * warmth * (0.78 + Math.max(point.depth, 0) * 0.22));
+      drawLight(point.x, point.y, (2 + warmth * 0.9) * scale, color, reveal * warmth * front);
     }
+  }
+
+  function positionGifts(mobile) {
+    const spacing = treeWidth * (mobile ? 0.96 : 1.22);
+    const floor = height * (mobile ? 0.885 : 0.903);
+    const greenGift = {
+      x: centerX - spacing + 24 * scale, y: floor + 4 * scale, size: 18, color: "#496f56", ribbon: "#f1d7a0",
+    };
+    presents = [
+      { x: centerX - spacing, y: floor, size: 25, color: "#893d37", ribbon: "#e7ba70" },
+      greenGift,
+      { x: centerX + spacing, y: floor + 4 * scale, size: 22, color: "#c09151", ribbon: "#fff0ba" },
+    ];
+    giftHotspot.style.left = greenGift.x + "px";
+    giftHotspot.style.top = greenGift.y - greenGift.size * scale * 0.73 / 2 + "px";
   }
 
   function drawGifts(progress) {
     const appear = ramp(0.87, 1, progress);
     if (appear <= 0) return;
-    const spacing = treeWidth * (width > 750 ? 1.22 : 0.96);
-    const floor = height * (width > 750 ? 0.903 : 0.885);
-    const presents = [
-      { x: centerX - spacing, y: floor, size: 25, color: "#893d37", ribbon: "#e7ba70" },
-      { x: centerX - spacing + 24 * scale, y: floor + 4 * scale, size: 18, color: "#496f56", ribbon: "#f1d7a0" },
-      { x: centerX + spacing, y: floor + 4 * scale, size: 22, color: "#c09151", ribbon: "#fff0ba" },
-    ];
     const pen = snowContext;
     pen.save();
     pen.globalAlpha = appear;
@@ -488,18 +537,20 @@
     drawForeground(time, snow, progress);
   }
 
-  function updateFlight(flightProgress) {
-    const sleighVisible = flightProgress >= sleighStart;
+  function updateFlight(flightProgress, timestamp) {
+    const leaving = departureStart !== null;
+    const departure = leaving ? (reducedMotion.matches ? 1 : clamp((timestamp - departureStart) / departureDuration)) : 0;
+    const sleighVisible = flightProgress >= sleighStart && departure < 1;
     const arrived = flightProgress >= 1;
     canRotate = arrived;
     sleigh.toggleAttribute("hidden", !sleighVisible);
-    ornament.toggleAttribute("hidden", !arrived);
-    starEgg.toggleAttribute("hidden", !arrived);
+    ornament.toggleAttribute("hidden", !arrived || leaving);
+    giftHotspot.toggleAttribute("hidden", !arrived);
     track.classList.toggle("can-rotate", arrived);
-    sleigh.classList.toggle("is-flying", sleighVisible && !arrived);
+    sleigh.classList.toggle("is-flying", sleighVisible && (!arrived || leaving));
 
     if (sleighVisible) {
-      const pose = flightPose(clamp((flightProgress - sleighStart) / (1 - sleighStart)));
+      const pose = leaving ? departurePose(departure) : flightPose(clamp((flightProgress - sleighStart) / (1 - sleighStart)));
       sleigh.style.opacity = pose.opacity;
       sleigh.style.transform = "translate3d(calc(" + pose.x + "px - 50%), calc(" + pose.y
         + "px - 50%), 0) rotate(" + pose.bank + "deg) scale(" + pose.scale + ")";
@@ -514,9 +565,11 @@
       flightStart = Math.min(flightStart, timestamp - sceneDuration);
     }
     const progress = flightStart === null ? 0 : clamp((timestamp - flightStart) / sceneDuration);
-    updateFlight(progress);
-    if (timestamp - lastFrame >= 30 || reducedMotion.matches) {
-      const response = reducedMotion.matches ? 1 : 0.29;
+    updateFlight(progress, timestamp);
+    const turning = Math.abs(targetYaw - yaw) > 0.002;
+    const elapsed = timestamp - lastFrame;
+    if (elapsed >= (turning ? 15 : 30) || reducedMotion.matches) {
+      const response = reducedMotion.matches || !turning ? 1 : 1 - Math.exp(-Math.min(elapsed, 55) / 68);
       yaw += (targetYaw - yaw) * response;
       drawScene(progress, reducedMotion.matches ? 0 : timestamp / 1000);
       lastFrame = timestamp;
@@ -534,8 +587,14 @@
     requestPaint();
   }
 
+  ornament.addEventListener("greeting-read", () => {
+    departureStart = performance.now();
+    requestPaint();
+  });
+
   document.querySelector("#scroll-cue").addEventListener("click", () => {
     flightStart = null;
+    departureStart = null;
     gesture = null;
     track.classList.remove("is-rotating");
     yaw = targetYaw = 0;

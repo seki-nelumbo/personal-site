@@ -1,6 +1,6 @@
 const card = document.querySelector("#christmas-letter");
 const composer = document.querySelector("#compose");
-const eggPage = document.querySelector("#star-egg-page");
+const giftDialog = document.querySelector("#gift-dialog");
 const cardRecipient = document.querySelector("#card-recipient");
 const cardMessage = document.querySelector("#card-message");
 const cardSender = document.querySelector("#card-sender");
@@ -11,6 +11,7 @@ const shareFields = document.querySelector("#share-fields");
 const shareLink = document.querySelector("#share-link");
 const shareStatus = document.querySelector("#share-status");
 let previewTrigger = null;
+let readingDeliveredLetter = false;
 
 const defaultCard = {
   recipient: cardRecipient.textContent,
@@ -38,12 +39,13 @@ showGreeting(readGreeting(new URLSearchParams(window.location.search)));
 document.querySelector("#open-compose").addEventListener("click", () => {
   composer.showModal();
 });
-document.querySelector("#star-egg").addEventListener("click", () => {
-  eggPage.showModal();
+document.querySelector("#green-gift").addEventListener("click", () => {
+  giftDialog.showModal();
 });
 for (const button of document.querySelectorAll("[data-open-card]")) {
   button.addEventListener("click", () => {
     if (card.open) return;
+    readingDeliveredLetter = button === treeCard;
     if (composer.open) {
       previewTrigger = button;
       composer.close();
@@ -52,13 +54,17 @@ for (const button of document.querySelectorAll("[data-open-card]")) {
   });
 }
 card.addEventListener("close", () => {
+  if (readingDeliveredLetter) {
+    readingDeliveredLetter = false;
+    treeCard.dispatchEvent(new Event("greeting-read"));
+  }
   if (!previewTrigger) return;
   const trigger = previewTrigger;
   previewTrigger = null;
   composer.showModal();
   trigger.focus();
 });
-for (const dialog of [card, composer]) {
+for (const dialog of [card, composer, giftDialog]) {
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) dialog.close();
   });

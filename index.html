@@ -33,13 +33,12 @@
         <div class="sleigh-arrival" id="sleigh-arrival" hidden>
           <img class="sleigh-image" src="assets/santa-sleigh.png" width="1120" height="560"
             alt="驯鹿拉着红色雪橇，圣诞老人举着一封信" draggable="false">
-          <button class="tree-card" id="tree-card" type="button" data-open-card aria-haspopup="dialog" hidden>
-            <span class="tree-card-label">打开贺卡</span>
-          </button>
+          <button class="tree-card" id="tree-card" type="button" data-open-card aria-label="打开贺卡"
+            aria-haspopup="dialog" hidden></button>
         </div>
 
-        <button class="star-egg" id="star-egg" type="button" aria-label="打开树顶彩蛋"
-          aria-haspopup="dialog" aria-controls="star-egg-page" hidden></button>
+        <button class="gift-hotspot" id="green-gift" type="button" aria-label="查看礼物"
+          aria-haspopup="dialog" aria-controls="gift-dialog" hidden></button>
 
         <div class="scene-controls">
           <button class="scroll-cue" id="scroll-cue" type="button">
@@ -62,14 +61,13 @@
       <div class="compose-copy">
         <span class="section-star" aria-hidden="true">✦</span>
         <h2 id="compose-title">寄出你的祝福</h2>
-        <p>写下对方的名字和一句祝福，把亲手写的贺卡送给朋友</p>
         <img class="compose-image" src="assets/christmas-eve.jpg" width="1536" height="1024"
           alt="雪夜里亮着暖灯的松林小屋" loading="lazy">
       </div>
       <form id="card-form">
         <div class="form-row">
-          <label>收信人 <input name="to" maxlength="24" placeholder="朋友的名字" autocomplete="off"></label>
-          <label>落款 <input name="from" maxlength="24" placeholder="你的名字" autocomplete="off"></label>
+          <label>收信人 <input name="to" maxlength="24" autocomplete="off"></label>
+          <label>落款 <input name="from" maxlength="24" autocomplete="off"></label>
         </div>
         <label>祝福语
           <textarea name="wish" maxlength="160" rows="4" placeholder="愿你这个冬天，遇到很多温柔的小事"></textarea>
@@ -100,10 +98,19 @@
       <p id="card-sender">—— 圣诞来信</p>
     </article>
   </dialog>
-  <dialog class="letter egg-page" id="star-egg-page" aria-label="彩蛋">
-    <form method="dialog" class="close-form">
-      <button class="close-card" type="submit" aria-label="关闭彩蛋" autofocus>×</button>
-    </form>
+  <dialog class="letter gift-dialog" id="gift-dialog" aria-label="礼物">
+    <div class="letter-paper">
+      <form method="dialog" class="close-form">
+        <button class="close-card" type="submit" aria-label="关闭礼物" autofocus>×</button>
+      </form>
+      <p class="gift-code">神秘兑换码：<strong>Se20261225Ki</strong></p>
+      <p class="gift-clue-label">线索</p>
+      <figure class="gift-clue">
+        <img src="assets/gift-ant-christmas-eve.jpg" alt="平安夜里，蓝色蚂蚁背着红苹果走过雪地，远处的圣诞树亮着暖灯"
+          width="560" height="560" loading="lazy">
+        <figcaption>（时间and地点）</figcaption>
+      </figure>
+    </div>
   </dialog>
 </body>
 </html>
