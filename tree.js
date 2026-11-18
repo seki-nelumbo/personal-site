@@ -352,6 +352,7 @@
 
   function drawDecorations(rotation, opacity) {
     for (const decoration of decorations) {
+<<<<<<< HEAD
       const point = project(decoration.height, decoration.angle + rotation, 0.76);
       const front = ramp(-0.05, 0.38, point.depth);
       if (front <= 0) continue;
@@ -361,6 +362,18 @@
       context.fillStyle = decoration.gold ? "#ac773c" : "#963d40";
       context.strokeStyle = rim + "bb";
       context.lineWidth = 0.75 * scale;
+=======
+      const point = project(decoration.height, decoration.angle + rotation, 0.86);
+      const front = ramp(-0.45, 0.27, point.depth);
+      if (front <= 0) continue;
+      context.globalAlpha = opacity * front;
+      const radius = decoration.size * scale * (0.85 + 0.15 * front);
+      const color = decoration.tone > 0.65 ? 0 : 1;
+      const tone = lightColors[color][0];
+      context.fillStyle = color === 0 ? "#9e6b32" : "#832e32";
+      context.strokeStyle = tone + "bb";
+      context.lineWidth = 0.75;
+>>>>>>> 1486cad095f0bc3465345631968d4685ad90238d
       context.beginPath();
       context.arc(point.x, point.y, radius, 0, turn);
       context.fill();
@@ -545,7 +558,11 @@
     canRotate = arrived;
     sleigh.toggleAttribute("hidden", !sleighVisible);
     ornament.toggleAttribute("hidden", !arrived || leaving);
+<<<<<<< HEAD
     giftHotspot.toggleAttribute("hidden", !arrived);
+=======
+    starEgg.toggleAttribute("hidden", !arrived);
+>>>>>>> 1486cad095f0bc3465345631968d4685ad90238d
     track.classList.toggle("can-rotate", arrived);
     sleigh.classList.toggle("is-flying", sleighVisible && (!arrived || leaving));
 
