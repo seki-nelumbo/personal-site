@@ -60,6 +60,11 @@
     ["#ffc45c", "#fff0b4"],
     ["#ff654e", "#ffd1a8"],
     ["#87dcb7", "#e4ffe8"],
+    ["#f596b1", "#ffe4ee"],
+  ];
+  const sparkRibbons = [
+    { clusters: 22, tail: 6, phase: 0.03, speed: 0.038, angle: 0.91, radius: 1.04, opacity: 0.94, colors: [0, 0, 3, 0, 2] },
+    { clusters: 16, tail: 4, phase: 0.08, speed: -0.024, angle: -0.95, radius: 1.07, opacity: 0.70, colors: [3, 0, 3, 3] },
   ];
   const wireOpacity = [0.16, 0.42, 0.73, 1];
   const halos = lightColors.map(([color]) => {
@@ -352,7 +357,6 @@
 
   function drawDecorations(rotation, opacity) {
     for (const decoration of decorations) {
-<<<<<<< HEAD
       const point = project(decoration.height, decoration.angle + rotation, 0.76);
       const front = ramp(-0.05, 0.38, point.depth);
       if (front <= 0) continue;
@@ -362,18 +366,6 @@
       context.fillStyle = decoration.gold ? "#ac773c" : "#963d40";
       context.strokeStyle = rim + "bb";
       context.lineWidth = 0.75 * scale;
-=======
-      const point = project(decoration.height, decoration.angle + rotation, 0.86);
-      const front = ramp(-0.45, 0.27, point.depth);
-      if (front <= 0) continue;
-      context.globalAlpha = opacity * front;
-      const radius = decoration.size * scale * (0.85 + 0.15 * front);
-      const color = decoration.tone > 0.65 ? 0 : 1;
-      const tone = lightColors[color][0];
-      context.fillStyle = color === 0 ? "#9e6b32" : "#832e32";
-      context.strokeStyle = tone + "bb";
-      context.lineWidth = 0.75;
->>>>>>> 1486cad095f0bc3465345631968d4685ad90238d
       context.beginPath();
       context.arc(point.x, point.y, radius, 0, turn);
       context.fill();
@@ -388,9 +380,9 @@
     context.globalAlpha = 1;
   }
 
-  function garlandPoint(progress, rotation) {
+  function garlandPoint(progress, rotation, radial = 1) {
     const length = 0.095 + progress * 0.855;
-    return project(length, length * turn * 5.6 + rotation - 2.5);
+    return project(length, length * turn * 5.6 + rotation - 2.5, radial);
   }
 
   function drawMagic(progress, rotation) {
@@ -469,6 +461,52 @@
     }
   }
 
+  function drawSparkle(x, y, radius, color, alpha) {
+    const inset = radius * 0.22;
+    context.globalAlpha = alpha;
+    context.fillStyle = lightColors[color][1];
+    context.beginPath();
+    context.moveTo(x, y - radius);
+    context.quadraticCurveTo(x + inset, y - inset, x + radius * 0.68, y);
+    context.quadraticCurveTo(x + inset, y + inset, x, y + radius);
+    context.quadraticCurveTo(x - inset, y + inset, x - radius * 0.68, y);
+    context.quadraticCurveTo(x - inset, y - inset, x, y - radius);
+    context.fill();
+    context.globalAlpha = 1;
+  }
+
+  function drawGarlandSparks(time, rotation, lighting) {
+    for (const ribbon of sparkRibbons) {
+      const travel = ribbon.phase + (time * ribbon.speed) % 1;
+      const direction = Math.sign(ribbon.speed);
+      for (let cluster = 0; cluster < ribbon.clusters; cluster++) {
+        const head = (1 + cluster / ribbon.clusters + travel) % 1;
+        const twinkle = 0.77 + Math.cos(time * 1.67 + cluster * 2.4) * 0.20;
+        const color = ribbon.colors[cluster % ribbon.colors.length];
+        const spacing = (0.0036 + (cluster % 3) * 0.0006) * direction;
+        for (let tail = ribbon.tail - 1; tail >= 0; tail--) {
+          const position = head - tail * spacing;
+          const lit = ramp(0, 0.065, lighting - position);
+          const ends = ramp(0.025, 0.09, position) * (1 - ramp(0.91, 0.98, position));
+          if (lit * ends <= 0) continue;
+
+          const drift = Math.sin(position * 14 + time * 0.64) * 0.12;
+          const point = garlandPoint(position, rotation + ribbon.angle + drift, ribbon.radius);
+          const front = ramp(-0.25, 0.50, point.depth);
+          if (front <= 0) continue;
+
+          const strength = 1 - tail / ribbon.tail;
+          const radius = (0.54 + strength * 1.04) * scale;
+          const alpha = lit * ends * front * twinkle * strength * ribbon.opacity;
+          drawLight(point.x, point.y, radius, color, alpha);
+          if (tail === 0 && cluster % 5 === 1) {
+            drawSparkle(point.x, point.y, (3.15 + twinkle * 1.65) * scale, color, alpha);
+          }
+        }
+      }
+    }
+  }
+
   function positionGifts(mobile) {
     const spacing = treeWidth * (mobile ? 0.96 : 1.22);
     const floor = height * (mobile ? 0.885 : 0.903);
@@ -542,6 +580,7 @@
     if (lighting > 0) {
       drawDecorations(rotation, ramp(0.16, 0.64, lighting));
       drawGarland(time, rotation, lighting, snow);
+      drawGarlandSparks(time, rotation, lighting);
     }
     if (progress > starArrival) {
       drawStar(centerX, starY(), 17 * scale, time, ramp(starArrival, starArrival + 0.09, progress));
@@ -558,11 +597,7 @@
     canRotate = arrived;
     sleigh.toggleAttribute("hidden", !sleighVisible);
     ornament.toggleAttribute("hidden", !arrived || leaving);
-<<<<<<< HEAD
     giftHotspot.toggleAttribute("hidden", !arrived);
-=======
-    starEgg.toggleAttribute("hidden", !arrived);
->>>>>>> 1486cad095f0bc3465345631968d4685ad90238d
     track.classList.toggle("can-rotate", arrived);
     sleigh.classList.toggle("is-flying", sleighVisible && (!arrived || leaving));
 

@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="tree.js" defer></script>
   <script src="card.js" defer></script>
+  <script src="music.js" defer></script>
 </head>
 <body id="top">
   <a class="skip-link" href="#scroll-cue">跳到特效控制</a>
@@ -19,10 +20,16 @@
         <canvas id="scene-snow" aria-hidden="true"></canvas>
         <header class="site-header">
           <a class="wordmark" href="#greeting"><span aria-hidden="true">✦</span> 圣诞来信</a>
-          <button class="compose-trigger" id="open-compose" type="button" aria-haspopup="dialog" aria-controls="compose">
-            写一张贺卡 <span aria-hidden="true">↗</span>
-          </button>
+          <div class="header-actions">
+            <button class="music-trigger" id="toggle-music" type="button" aria-label="背景音乐" aria-pressed="false" hidden>
+              <span class="music-note" aria-hidden="true">♪</span> 音乐
+            </button>
+            <button class="compose-trigger" id="open-compose" type="button" aria-haspopup="dialog" aria-controls="compose">
+              写一张贺卡 <span aria-hidden="true">↗</span>
+            </button>
+          </div>
         </header>
+        <audio id="background-music" src="music/Facing%20The%20Sun%20-%20Jamvana%20(Soft).mp3" preload="none" loop></audio>
 
         <div class="scene-copy">
           <p class="holiday" lang="en">Merry Christmas</p>
